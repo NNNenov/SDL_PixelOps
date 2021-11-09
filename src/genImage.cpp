@@ -86,8 +86,9 @@ void genImage::displayAdapter()
 	SDL_RenderCopy(pRenderer, pTexture, NULL, NULL); //&srcRect, &bounds); // maybe try use blit instead?
 }
 
-void genImage::displayThru(std::vector<vec3i> pic)
+void genImage::displayThru(std::vector<vec3i> &pic)
 {
+	//std::cout << "\n     display thru xy size: " << std::endl; // << xSize << " , " << ySize << std::endl;
 	// temp pixel buffer
 	Uint32* tempPixels = new Uint32[xSize * ySize];
 
@@ -96,28 +97,18 @@ void genImage::displayThru(std::vector<vec3i> pic)
 
 	for (int i = 0; i < xSize * ySize; ++i)
 	{
-		tempPixels[i] = pic.at(i).vtoUint32();
+		tempPixels[i] = pic[i].vtoUint32();
+		//tempPixels[i] = vec3i(70,0,120).vtoUint32();
 	}
-
+	
 	// update the texture with the temp buffer
 	SDL_UpdateTexture(pTexture, NULL, tempPixels, xSize * sizeof(Uint32)); //https://youtu.be/JN5yUrJPThI?t=2804
 
 	// delete the pixel buffer
 	delete[] tempPixels;
 
-	// copy texture to renderer
-
-	//SDL_Rect srcRect, bounds;
-	//srcRect.x = 0;
-	//srcRect.y = 0;
-	//srcRect.w = xSize;
-	//srcRect.h = ySize;
-	//bounds = srcRect;
 	SDL_RenderCopy(pRenderer, pTexture, NULL, NULL); //&srcRect, &bounds); // maybe try use blit instead?
 }
-
-
-
 
 
 // function to turn initialize the texture

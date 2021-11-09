@@ -39,8 +39,8 @@ void Engine::init(const char* title, int xpos, int ypos, int width, int height, 
 
 
 			 m_image.init(winW, winH, renderer);
-
-
+			 cGrid.init({ winW, winH }, unitScale);
+			 
 	} else { isRunning = false; }
 }
 
@@ -63,21 +63,24 @@ void Engine::handleEvents()
 
 void Engine::update()
 {
-	if (cnt == 1)
+	if (cnt == 0)
 	{
-		for (int x = 0; x < winW; ++x)
-		{
-			for (int y = 0; y < winH; ++y)
-			{
-				m_image.setPixel(x,y , chekUV(x, y));
-			}
-		}
+		cGrid.pointGrid(180);
+		cGrid.boxGrid(90, 10);
+
+		
+		
 	}
+
+
 
 	for (int i = 0; i < 1; ++i)
 	{
 		cnt++;
 
+		cGrid.shiftCells({ -1,0 });
+		cGrid.simulate();
+		////
 	}
 
 }
@@ -86,7 +89,8 @@ void Engine::render()
 {
 	SDL_RenderClear(renderer);
 
-	m_image.displayAdapter();
+	cGrid.resizeGrid({ winW, winH }, cGrid.gSize);
+	m_image.displayThru(cGrid.pixels);
 
 	SDL_RenderPresent(renderer);
 

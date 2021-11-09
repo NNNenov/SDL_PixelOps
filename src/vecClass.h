@@ -234,6 +234,19 @@ public:
         return result;
     }
 
+    vec lerpSmoothTo(vec b, float f)
+    {
+        return lerpTo(b, smootherstep(0, 1, f));
+    }
+
+    real smootherstep(real edge0, real edge1, real x) 
+    {
+        // Scale, and clamp x to 0..1 range
+        x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+        // Evaluate polynomial
+        return x * x * x * (x * (x * 6 - 15) + 10);
+    }
+
     vec abso() const
     {
         vec result;
@@ -343,7 +356,7 @@ public:
         return result;
     }
 
-    std::string toString(const bool vertex) const
+    std::string toString(const bool vertex = 1) const
     {
         std::string output = "";
 
@@ -352,7 +365,7 @@ public:
         for (int i = 0; i < n; ++i)
         {
             output.append(std::to_string(e[i]));
-            output.append(", ");
+            if (i!=n-1) output.append(", ");
         }
 
         if (vertex) output.append(" } ");

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "SDL_image.h"
 #include "genImage.h"
+#include "PixelGrid.h"
 
 
 class Engine
@@ -16,9 +17,6 @@ public:
 	void update();
 	void render();
 	void clean();
-	
-	void CA_Op_Debug(int cnt);
-	void directionMod(int cnt);
 
 	bool running() { return isRunning; }
 
@@ -30,8 +28,9 @@ public:
 	}
 
 protected:
-	// CA stuff
-	const int unitScale = 4;
+	// grid stuff
+	const int unitScale = 1;
+	CellGrid cGrid;
 	genImage m_image;
 
 	// Engine stuff

@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\CellClass.h" />
     <ClInclude Include="..\..\src\Engine.h" />
     <ClInclude Include="..\..\src\genImage.h" />
     <ClInclude Include="..\..\src\PixelGrid.h" />
