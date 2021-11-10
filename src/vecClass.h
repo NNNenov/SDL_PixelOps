@@ -147,8 +147,8 @@ public:
     vec operator/(const real rhs) const
     {
         vec result;
-        const real div_rhs = 1 / rhs;
-        for (int i = 0; i < n; ++i) result.e[i] = (e[i] * div_rhs);
+        const float div_rhs = 1.0f / rhs;
+        for (int i = 0; i < n; ++i) result.e[i] = (float(e[i]) * div_rhs);
         return result;
     }
 

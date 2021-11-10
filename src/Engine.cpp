@@ -65,10 +65,9 @@ void Engine::update()
 {
 	if (cnt == 0)
 	{
-		cGrid.pointGrid(180);
-		cGrid.boxGrid(90, 10);
 
-		
+		cGrid.pointGrid({ 50,50 } , 80);
+		cGrid.boxGrid({ 50,50 } , 40, 10);
 		
 	}
 
@@ -77,8 +76,11 @@ void Engine::update()
 	for (int i = 0; i < 1; ++i)
 	{
 		cnt++;
-
-		cGrid.shiftCells({ -1,0 });
+		
+		if (cnt % 80 == 0) custom++;
+		cGrid.pointGrid({ 50+sin((float)cnt/50)*20 , 50 + cos((float)cnt / 50) * 20 } , 40);
+		if (cnt % 80 < 10) cGrid.boxGrid({ 20,20 } , 20+ 20*(1+ custom %4), 10*(1 + custom %2));
+		cGrid.shiftCells({ sin((float)cnt / 50)*2, cos((float)cnt / 50)*2 });
 		cGrid.simulate();
 		////
 	}
@@ -89,7 +91,7 @@ void Engine::render()
 {
 	SDL_RenderClear(renderer);
 
-	cGrid.resizeGrid({ winW, winH }, cGrid.gSize);
+	cGrid.resizeGrid( cGrid.gSize , { winW, winH });
 	m_image.displayThru(cGrid.pixels);
 
 	SDL_RenderPresent(renderer);
@@ -98,7 +100,6 @@ void Engine::render()
 
 void Engine::clean()
 {
-
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();

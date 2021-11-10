@@ -29,7 +29,7 @@ public:
 
 protected:
 	// grid stuff
-	const int unitScale = 1;
+	const int unitScale = 3;
 	CellGrid cGrid;
 	genImage m_image;
 
@@ -38,7 +38,7 @@ protected:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	int cnt =0;
-
+	int custom = 0;
 	int winW, winH;
 
 };

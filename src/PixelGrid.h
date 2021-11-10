@@ -35,11 +35,12 @@ public:
 		pSize = pixelSpace;
 		gSize = pSize / scale;
 		cells.resize(gSize.x() * gSize.y());
-		pixels.resize(gSize.x() * gSize.y());
+		pixels.resize(pSize.x() * pSize.y());
 		std::cout << "\n   pixelGrid initialized " << std::endl;
+		std::cout << "         scale: " << scale << std::endl;
 		std::cout << "     Grid Size: " << gSize.toString() << std::endl;
-		std::cout << "   Pixel Scale: " << pSize.toString() << std::endl;
-		cells[gSize.x() * gSize.y() - 1].print();
+		std::cout << "    Pixel Size: " << pSize.toString() << std::endl;
+		//cells[gSize.x() * gSize.y() - 1].print();
 	}
 
 	vec2i gS() { return gSize;     };
@@ -54,23 +55,24 @@ public:
 
 	Cell scaleResCell(int x, int y) 
 	{
-		int x_ratio = (int)((gSize.x() / pSize.y()) << 16);
-		int y_ratio = (int)((gSize.y() / pSize.y()) << 16);
 
-		int x2, y2;
-		x2 = ((x * (x_ratio + 1)) >> 16);
-		y2 = ((y * (y_ratio + 1)) >> 16);
+		int x_ratio = (int)((gSize.x() << 16) / pSize.x()) + 1;
+		int y_ratio = (int)((gSize.y() << 16) / pSize.y()) + 1;
 
-		return cells[(y2 * gSize.x()) + x2];
+		float x2, y2;
+		x2 = (x * (x_ratio) >> 16);
+		y2 = (y * (y_ratio) >> 16);
+
+		int id = (y2 * gSize.x()) + x2;
+		return cells[id]; 
 	}
 
 	void resizeGrid(vec2i sourceRes, vec2i targetRes) 
 	{
 		//std::cout << "\n    resizing to: " << targetRes.toString() << std::endl; // << xSize << " , " << ySize << std::endl;
-		vec3i c = { 0, 200, 0 };
-		for (int y = 0; y < targetRes.y(); ++y) 
+		for (int y = 0; y < targetRes.y()-1; ++y) 
 		{
-			for (int x = 0; x < targetRes.x(); ++x) 
+			for (int x = 0; x < targetRes.x()-1; ++x) 
 			{
 				pixels[(y * targetRes.x()) + x] = scaleResCell(x, y).rgb();
 			}
@@ -101,41 +103,41 @@ public:
 
 		for (int i = 0; i < wh.x(); ++i)
 		{
-			setCell({ TL.x() + i      , TL.y() }, 255);
-			setCell({ TL.x() + i      , TL.y() + wh.y() }, 255);
+			setCell({ TL.x() + i      , TL.y() }, 1);
+			setCell({ TL.x() + i      , TL.y() + wh.y() }, 1);
 		}
 
 		for (int i = 0; i < wh.y() + 1; ++i)
 		{
-			setCell({ TL.x()         , TL.y() + i }, 255);
-			setCell({ TL.x() + wh.x()  , TL.y() + i }, 255);
+			setCell({ TL.x()         , TL.y() + i }, 1);
+			setCell({ TL.x() + wh.x()  , TL.y() + i }, 1);
 		}
 	}
 
-	void pointGrid(const int gMod)
+	void pointGrid(const vec2i off , const int gMod)
 	{
-		for (int x = 1; x < xS() - 1; ++x)
+		for (int x = 1 + off.x(); x < xS() - 1 - off.x(); ++x)
 		{
 			if (x % gMod == 0)
 			{
-				for (int y = 1; y < yS() - 1; ++y)
+				for (int y = 1 + off.y(); y < yS() - 1 - off.y(); ++y)
 				{
 					if (y % gMod == 0)
 					{
-						setCell({ x , y }, 255);
+						setCell({ x , y }, 1);
 					}
 				}
 			}
 		}
 	}
 
-	void boxGrid(const int gMod, int s)
+	void boxGrid(const vec2i off, const int gMod, int s)
 	{
-		for (int x = 1; x < xS() - 1; ++x)
+		for (int x = 1 + off.x(); x < xS() - 1 - off.x(); ++x)
 		{
 			if (x % gMod == 0)
 			{
-				for (int y = 1; y < yS() - 1; ++y)
+				for (int y = 1 + off.y(); y < yS() - 1 - off.y(); ++y)
 				{
 					if (y % gMod == 0)
 					{
@@ -149,14 +151,14 @@ public:
 	void shiftCells(vec2i dir, bool cl = false)
 	{
 		std::vector<Cell> cellBuffer(xS()* yS());
-		std::cout << "\n direction:	" << dir.toString() << std::endl;
+		//std::cout << "\n direction:	" << dir.toString() << std::endl;
 		
 		int cX;
 		int cY;
 		int shiftX;
 		int shiftY;
 
-		for (int x = 0; x < xS() - 1; ++x)
+		for (int x = xS(); x >0  ; --x)
 		{
 			for (int y = 0; y < yS() - 1; ++y)
 			{
@@ -165,11 +167,12 @@ public:
 				shiftX = clamp(x + dir.x(), 1, xS() - 1);
 				shiftY = clamp(y + dir.y(), 1, yS() - 1);
 
-				cellBuffer[cY * xS() + cX].set( cells[shiftY * xS() + shiftX].alive());
+				cellBuffer[cY * xS() + cX].set( cells[shiftY * xS() + shiftX]);
 
+				//if (y == yS()/2) cellBuffer[cY * xS() + cX].print();
 			}
 		}
-		
+
 		cells = cellBuffer;
 	}
 

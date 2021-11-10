@@ -8,7 +8,7 @@ public:
 	int age = 0;
 
 	std::vector<vec3i> palette{
-								vec3i( 0   , 0   , 0   ) ,
+								vec3i( 5   , 0   , 10   ) ,
 								vec3i( 0   , 0   , 15  ) ,
 								vec3i( 1   , 5   , 22  ) ,
 								vec3i( 2   , 10  , 40  ) ,
@@ -26,11 +26,14 @@ public:
 		if (A) age = L;
 	}
 
-	void operator = (Cell rhs)
+	void set(Cell & rhs)
 	{
-		int maxAge = rhs.maxAge;
-		int age = rhs.age;
-		update();
+		maxAge = rhs.maxAge;
+		age = rhs.age;
+		pid = rhs.pid;
+
+		//update();
+
 	}
 
 	bool alive() { return (age > 0); }
@@ -67,6 +70,6 @@ public:
 			         "\n   maxAge = " << maxAge <<
 			         "\n      age = " << age <<
 			         "\nageNormal = " << ageNormal() <<
-			         "\n    alive = " << alive() << std::endl;
+			         "\n  alive() = " << alive() << std::endl;
 	}
 };
