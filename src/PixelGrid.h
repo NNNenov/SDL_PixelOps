@@ -47,13 +47,13 @@ public:
 	int   xS() { return gSize.x(); };
 	int   yS() { return gSize.y(); };
 
-	std::vector<vec3i> printPixels()
+	std::vector<vec3i> & printPixels()
 	{
 		resizeGrid(gSize, pSize);
 		return pixels;
 	}
 
-	Cell scaleResCell(int x, int y) 
+	Cell & scaleResCell(int x, int y) 
 	{
 
 		int x_ratio = (int)((gSize.x() << 16) / pSize.x()) + 1;
@@ -81,12 +81,13 @@ public:
 
 	// drawing functions
 
-	void simulate()
+	void simulate(int gen, int mod)
 	{
 		for (int i = 0; i < cells.size(); ++i)
 		{
 			cells[i].update();
-			cells[i].olden();
+			if (gen%mod ==0) cells[i].olden();
+			// cells[i].olden();
 		}
 	}
 
@@ -150,7 +151,7 @@ public:
 
 	void shiftCells(vec2i dir, bool cl = false)
 	{
-		std::vector<Cell> cellBuffer(xS()* yS());
+		std::vector<Cell> cellBuffer = cells; // (xS() * yS());
 		//std::cout << "\n direction:	" << dir.toString() << std::endl;
 		
 		int cX;
@@ -176,5 +177,51 @@ public:
 		cells = cellBuffer;
 	}
 
+	std::vector<Cell> get2Dhood(vec2i pos)
+	{
+		std::vector<Cell> result(8); // 8 neighbours
+		int c = 0;
+		//std::cout << "init pos sample: " << pos.toString() << std::endl;
+		for (int i = 0; i < 9; ++i) // iterate 3x3 grid
+		{
+			int x = i % 3 - 1;		// subtract 1 to center the offset (-1, 0, 1)
+			int y = (i - x) / 3 - 1;
 
+			int px = pos.x() + x;
+			int py = pos.y() + y;
+			int id = py * gSize.x() + px;
+			
+			if (i!=4)				// id 4 is the center cell, dont count it as neighbour
+			{
+				++c;
+				//std::cout << "pos sample (i): " << i << "__ (c): " << c << " ___ " << vec2i{ x, y }.toString() << " state: "<< cells[id].alive() << std::endl;
+				result[c-1].set(cells[id]);
+			}
+		}
+		//std::cout << "return result " << std::endl;
+		return result;
+	}
+
+	void CA2D_Sim()
+	{
+		std::vector<Cell> cellBuffer = cells;//(xS() * yS());
+		//std::cout << "\n direction:	" << dir.toString() << std::endl;
+
+		for (int x = 1; x < xS()-1; ++x)
+		{
+			for (int y = 1; y < yS() - 1; ++y)
+			{
+				//cX = clamp(x, 0, xS());
+				//cY = clamp(y, 0, yS());
+				std::vector<Cell> nei = get2Dhood({ x, y });
+
+				cellBuffer[y * xS() + x].CA2D( nei );
+
+				//if (y == yS()/2) cellBuffer[cY * xS() + cX].print();
+			}
+		}
+
+		cells = cellBuffer;
+	}
+	
 };

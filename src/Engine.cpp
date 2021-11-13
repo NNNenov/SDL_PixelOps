@@ -77,14 +77,18 @@ void Engine::update()
 	{
 		cnt++;
 		
-		if (cnt % 80 == 0) custom++;
+		if (cnt % 120 == 0) custom++;
 		cGrid.pointGrid({ 50+sin((float)cnt/50)*20 , 50 + cos((float)cnt / 50) * 20 } , 40);
-		if (cnt % 80 < 10) cGrid.boxGrid({ 20,20 } , 20+ 20*(1+ custom %4), 10*(1 + custom %2));
-		cGrid.shiftCells({ sin((float)cnt / 50)*2, cos((float)cnt / 50)*2 });
-		cGrid.simulate();
+		if (cnt % 80 < 40) cGrid.boxGrid({ 20,20 } , 20+ 20*(1+ custom %4), 10*(1 + custom %2));
+		
+		
+		if (cnt % 120 > 20) cGrid.CA2D_Sim();
+		else cGrid.shiftCells({ sin((float)cnt / 80) * 2, cos((float)cnt / 80) * 2 });
+
+		cGrid.simulate(cnt, 2);
 		////
 	}
-
+	
 }
 
 void Engine::render()

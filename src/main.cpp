@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
 		engine->handleEvents();
 		engine->update();
-	
+		engine->render();
 		frameTime = SDL_GetTicks() - frameStart;
 		
 		if (frameDelay > frameTime)
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 			SDL_Delay(frameDelay - frameTime);
 		}
 
-		engine->render();
+		
 	}
 
 	engine->clean();

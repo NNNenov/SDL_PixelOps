@@ -29,7 +29,7 @@ public:
 
 protected:
 	// grid stuff
-	const int unitScale = 3;
+	const int unitScale = 4;
 	CellGrid cGrid;
 	genImage m_image;
 

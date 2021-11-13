@@ -4,22 +4,36 @@ class Cell
 {
 
 public:
-	int maxAge = 50;
+
+	int maxAge = 150;
 	int age = 0;
 
+
+	// cellular automata parameters
+	std::vector<int> B = { 2 };     // living neighbours required to be born (if dead)
+	std::vector<int> S = { 3 , 4 , 5 }; // living neighbours required to survive (if alive)
+	int ref = 4;                    // refractory states // countdown after dying before exposing to calculation
+	int r = 0;                      // refractory state buffer
+
+
 	std::vector<vec3i> palette{
-								vec3i( 5   , 0   , 10   ) ,
-								vec3i( 0   , 0   , 15  ) ,
-								vec3i( 1   , 5   , 22  ) ,
-								vec3i( 2   , 10  , 40  ) ,
-								vec3i( 6   , 40  , 150 ) ,
+								vec3i( 4   , 5   , 10  ) ,
+								vec3i( 5   , 10  , 15  ) ,
+								vec3i( 1   , 12  , 22  ) ,
+								vec3i( 20   , 10  , 40  ) ,
+								vec3i( 50   , 70  , 150 ) ,
+								vec3i( 80 , 150 , 255 ) ,
 								vec3i( 215 , 240 , 255 ) };
 
 	int pid = 0;
 
 	Cell() {}
 	~Cell() {}
-
+	Cell(int A, int L)
+	{
+		maxAge = A;
+		age = L;
+	}
 	Cell(bool A, int L)
 	{
 		maxAge = L;
@@ -31,24 +45,22 @@ public:
 		maxAge = rhs.maxAge;
 		age = rhs.age;
 		pid = rhs.pid;
-
-		//update();
-
 	}
 
-	bool alive() { return (age > 0); }
+	bool alive() { return (age > maxAge - ref); }
 
 	float ageNormal() { return (age>0) ? (float(age) / maxAge) : 0; }
+	float refracNormal() { return (r > 0) ? (float(r) / ref) : 0; }
 
-	vec3i rgb()
+	vec3i & rgb()
 	{
 		//std::cout << "pid: " << pid << std::endl;
-		return palette[clamp(pid-1, 0, 6)];
+		return palette[clamp(pid, 0, 6)];
 	}
 
-	void olden()
+	void olden(int amt = 1)
 	{
-		--age;
+		age = age - amt;
 		age = clamp(age, 0, maxAge);
 		//update(alive);
 	}
@@ -61,7 +73,49 @@ public:
 
 	void update()
 	{
-			pid = (float)palette.size() * ageNormal();
+		pid = (float)palette.size() * ageNormal();
+	}
+
+	Cell& CA2D(std::vector<Cell>& nei)  // 2d cellular automata
+	{
+		int liveN = 0;                  // count neighbours
+
+		for (int i = 0; i < nei.size(); ++i)
+		{
+			if (nei[i].alive()) { ++liveN; }
+		}
+
+		if (r == 0)
+		{
+			if (alive())
+			{
+				int s = 0;
+				for (int i = 0; i < S.size(); ++i)
+				{
+					if (liveN == S[i]) { ++s; } // increment s if any survival count rule matches number of living neighbours
+				}
+				if (s == 0) { r = ref; age = maxAge - ref; } // if no rule matches occured, s == 0, kill cell and set refractory timer to max
+			}
+			else 
+			{
+				int s = 0;
+				for (int i = 0; i < B.size(); ++i)
+				{
+					if (liveN == B[i]) { ++s; }
+				}
+				if (s > 0) { age = maxAge; }
+			}
+
+		}
+		else
+		{
+			//--r;
+			//olden(maxAge/ref);
+			r = clamp(--r, 0, ref);
+		}
+
+		//Cell result = Cell(maxAge, age);
+		return *this;//result;
 	}
 
 	void print()
