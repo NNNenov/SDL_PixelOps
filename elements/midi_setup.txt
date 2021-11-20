@@ -1,0 +1,24 @@
+How to set up midi (rtMidi) in C++
+
+STEP 1:		install rtMidi.core nuget package
+STEP 2:		go to rtmidi github: 
+			https://github.com/thestk/rtmidi
+			
+			copy
+			
+				RtMidi.cpp
+				RtMidi.h
+			
+			to your project folder together with your cpp files
+
+STEP 3:		Now you must set up windows multimedia api:
+
+			based on this site:
+			https://stackoverflow.com/questions/65449204/how-to-compile-rtmidi-api-properly-on-windows
+
+				STEP 1. add __WINDOWS_MM__ to the pre-processor definitions :
+								right click project > properties > C/C++ > Preprocessor > Preprocessor Definitions
+				STEP 2. add this to your code:
+				#define __WINDOWS_MM__
+
+STEP 4:		you can now use rtmidi, good start point is check test files from rtmidi github or use my basic parser nikMidi.h setup

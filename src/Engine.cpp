@@ -63,11 +63,18 @@ void Engine::handleEvents()
 
 void Engine::update()
 {
+	int sl_A = 32;
+	int sl_B = 16;
+	int sl_C = 4;
+	int secA = winW / sl_A;
+	int secB = winW / sl_B;
+	int secC = winW / sl_C;
+		
 	if (cnt == 0)
 	{
 
 		cGrid.pointGrid({ 50,50 } , 80);
-		cGrid.boxGrid({ 50,50 } , 40, 10);
+		cGrid.boxGrid(  { 50,50 } , 40, 10);
 		
 	}
 
@@ -75,18 +82,48 @@ void Engine::update()
 
 	for (int i = 0; i < 1; ++i)
 	{
-		cnt++;
-		
-		if (cnt % 120 == 0) custom++;
-		cGrid.pointGrid({ 50+sin((float)cnt/50)*20 , 50 + cos((float)cnt / 50) * 20 } , 40);
-		if (cnt % 80 < 40) cGrid.boxGrid({ 20,20 } , 20+ 20*(1+ custom %4), 10*(1 + custom %2));
-		
-		
-		if (cnt % 120 > 20) cGrid.CA2D_Sim();
-		else cGrid.shiftCells({ sin((float)cnt / 80) * 2, cos((float)cnt / 80) * 2 });
+		if (midiStatus.CCid == 1)
+		{
+			cnt = midiStatus.CC;
+		}
+		if (midiStatus.CCid == 2)
+		{
+			custom = 9*((float)midiStatus.CC/128);
+		}
+		cGrid.cellBuffer = cGrid.cells;
+		if (midiStatus.note.latch)
+		{
+			cnt ++;
+			if (midiStatus.channel != 0)
+			{
+				custom++; 
+			}
+			midiStatus.note.latch = false;
+		}
+		if (midiStatus.note.gate)
+		{
+			float mapA = midiStatus.deltaBi() * secA * 2 + cnt % (1 + custom);
+			int fancy = clamp<int>(mapA, int(0-secA+2), secA * 3);
+			cGrid.pointGrid({ secA + sin((float)cnt / secC +cnt) * secA -fancy,  secA + cos((float)cnt / secC +custom + fancy) * 20 }, secA+fancy);
+			if (midiStatus.channel == 1) cGrid.boxGrid({ secA,secA }, secA + secA * (1 + custom % 4), 10 * (1 + custom % 2));
+		}
+			
+			vec2i dir = { sin((float)cnt / secA) * 2, cos((float)cnt / secA) * 2 * midiStatus.deltaBi()*2 };
 
+			if (midiStatus.channel % 2 == 0)
+			{
+				if (midiStatus.note.gate)
+				{
+					cGrid.CA2D_Sim();
+				}
+				else cGrid.symShift(dir, custom);
+			}
+			else cGrid.symShift(dir, custom);
+			custom = custom % 30;
+		cGrid.cells = cGrid.cellBuffer;
 		cGrid.simulate(cnt, 2);
 		////
+		
 	}
 	
 }
@@ -96,8 +133,8 @@ void Engine::render()
 	SDL_RenderClear(renderer);
 
 	cGrid.resizeGrid( cGrid.gSize , { winW, winH });
-	m_image.displayThru(cGrid.pixels);
-
+	//m_image.displayThru(cGrid.pixels);
+	m_image.displayThruUint(cGrid.pixels);
 	SDL_RenderPresent(renderer);
 
 }

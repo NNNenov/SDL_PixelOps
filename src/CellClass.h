@@ -7,7 +7,9 @@ public:
 
 	int maxAge = 150;
 	int age = 0;
-
+	vec3i col = { 0,0,0 };
+	vec3i* colPtr{};
+	
 
 	// cellular automata parameters
 	std::vector<int> B = { 2 };     // living neighbours required to be born (if dead)
@@ -15,15 +17,14 @@ public:
 	int ref = 4;                    // refractory states // countdown after dying before exposing to calculation
 	int r = 0;                      // refractory state buffer
 
-
 	std::vector<vec3i> palette{
 								vec3i( 4   , 5   , 10  ) ,
 								vec3i( 5   , 10  , 15  ) ,
 								vec3i( 1   , 12  , 22  ) ,
-								vec3i( 20   , 10  , 40  ) ,
-								vec3i( 50   , 70  , 150 ) ,
+								vec3i( 10   , 10  , 40  ) ,
+								vec3i( 30   , 70  , 150 ) ,
 								vec3i( 80 , 150 , 255 ) ,
-								vec3i( 215 , 240 , 255 ) };
+								vec3i( 215 , 220 , 255 ) };
 
 	int pid = 0;
 
@@ -49,14 +50,19 @@ public:
 
 	bool alive() { return (age > maxAge - ref); }
 
-	float ageNormal() { return (age>0) ? (float(age) / maxAge) : 0; }
+	float ageNormal()    { return (age>0) ? (float(age) / float(maxAge)) : 0; }
 	float refracNormal() { return (r > 0) ? (float(r) / ref) : 0; }
 
 	vec3i & rgb()
 	{
-		//std::cout << "pid: " << pid << std::endl;
-		return palette[clamp(pid, 0, 6)];
-	}
+		//std::cout << "ageNormal: " << ageNormal() << std::endl;
+		//std::cout << "refracNormal: " << refracNormal() << std::endl;
+		vec3i pal = palette[clamp(pid, 0, 6)];
+		pal = vec3i{ (float)pal.r()*refracNormal() , pal.g() *ageNormal() , pal.b()};
+		//col = pal;
+		//colPtr = &col;
+		return pal;
+	}     
 
 	void olden(int amt = 1)
 	{
@@ -74,15 +80,16 @@ public:
 	void update()
 	{
 		pid = (float)palette.size() * ageNormal();
+		
 	}
 
-	Cell& CA2D(std::vector<Cell>& nei)  // 2d cellular automata
+	Cell& CA2D(std::vector<Cell*>& nei)  // 2d cellular automata
 	{
 		int liveN = 0;                  // count neighbours
 
 		for (int i = 0; i < nei.size(); ++i)
 		{
-			if (nei[i].alive()) { ++liveN; }
+			if (nei[i]->alive()) { ++liveN; }
 		}
 
 		if (r == 0)
@@ -105,12 +112,11 @@ public:
 				}
 				if (s > 0) { age = maxAge; }
 			}
-
 		}
 		else
 		{
 			//--r;
-			//olden(maxAge/ref);
+			olden();
 			r = clamp(--r, 0, ref);
 		}
 

@@ -181,3 +181,11 @@
 /SDL_PixelOps_msvc2019/SDL_PixelOps/x64/Release/main.nativecodeanalysis.sarif
 /SDL_PixelOps_msvc2019/SDL_PixelOps/x64/Release/main.nativecodeanalysis.xml
 /SDL_PixelOps_msvc2019/SDL_PixelOps/x64/Release/vc.nativecodeanalysis.all.xml
+/SDL_PixelOps_msvc2019/.vs/SDL_PixelOps_msvc2019/v16/ipch/AutoPCH/287d5fa7401d4db4/RTMIDI.ipch
+/SDL_PixelOps_msvc2019/.vs/SDL_PixelOps_msvc2019/v16/ipch/AutoPCH/4d047971b5bbe11d/NIKMIDI.ipch
+/SDL_PixelOps_msvc2019/packages/RtMidi.Core.1.0.51/.signature.p7s
+/SDL_PixelOps_msvc2019/packages/RtMidi.Core.1.0.51/RtMidi.Core.1.0.51.nupkg
+/SDL_PixelOps_msvc2019/packages/RtMidi.Core.1.0.51/build/RtMidi.Core.targets
+/SDL_PixelOps_msvc2019/x64/pixelOps_2.zip
+/src/RtMidi.cpp
+/src/RtMidi.h

@@ -19,8 +19,8 @@ public:
 
 	vec3i getPixel(const int x, const int y);
 	void displayAdapter();
-	void displayThru(std::vector<vec3i> &pic);
-
+	void displayThru(std::vector<vec3i*> pic);
+	void displayThruUint(Uint32* pic);
 protected:
 
 	//funcs

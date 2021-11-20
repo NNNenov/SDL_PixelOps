@@ -7,7 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL_PixelOps", "SDL_PixelOp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{907F2B46-905A-40DA-8A8F-CCD4115D3E38}"
 	ProjectSection(SolutionItems) = preProject
-		..\src\CellClass.h = ..\src\CellClass.h
+		..\src\RtMidi.cpp = ..\src\RtMidi.cpp
+		..\src\RtMidi.h = ..\src\RtMidi.h
 	EndProjectSection
 EndProject
 Global

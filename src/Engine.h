@@ -4,7 +4,7 @@
 #include "SDL_image.h"
 #include "genImage.h"
 #include "PixelGrid.h"
-
+#include "nikMidi.h"
 
 class Engine
 {
@@ -27,9 +27,12 @@ public:
 		return { r, g, 0 };
 	}
 
+	//midi
+	channelData midiStatus;
+
 protected:
 	// grid stuff
-	const int unitScale = 4;
+	const int unitScale = 2;
 	CellGrid cGrid;
 	genImage m_image;
 

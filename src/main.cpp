@@ -1,10 +1,16 @@
 #include "Engine.h"
+#include "nikMidi.h"
 
 Engine* engine = nullptr;
+MidiBaron midier;
 
 int main(int argc, char* argv[])
 {
+	// midi
+	midier.init(argc, argv);
+	midier.midiin->ignoreTypes(false, false, false); // Don't ignore sysex, timing, or active sensing messages.
 
+	// engine
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
@@ -13,12 +19,12 @@ int main(int argc, char* argv[])
 
 	engine = new Engine();
 
-	engine->init("fart planet", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920/2, 1080/2, true);
+	engine->init("pixelOps", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920/4, 1080/4, true);
 	
 	while (engine->running())
 	{
 		frameStart = SDL_GetTicks();
-
+		engine->midiStatus = midier.probeInput();
 		engine->handleEvents();
 		engine->update();
 		engine->render();
@@ -28,8 +34,6 @@ int main(int argc, char* argv[])
 		{
 			SDL_Delay(frameDelay - frameTime);
 		}
-
-		
 	}
 
 	engine->clean();

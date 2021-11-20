@@ -67,7 +67,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;__WINDOWS_MM__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -81,12 +81,15 @@
     <ClCompile Include="..\..\src\Engine.cpp" />
     <ClCompile Include="..\..\src\genImage.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\RtMidi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\CellClass.h" />
     <ClInclude Include="..\..\src\Engine.h" />
     <ClInclude Include="..\..\src\genImage.h" />
+    <ClInclude Include="..\..\src\nikMidi.h" />
     <ClInclude Include="..\..\src\PixelGrid.h" />
+    <ClInclude Include="..\..\src\RtMidi.h" />
     <ClInclude Include="..\..\src\vecClass.h" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +101,7 @@
     <Import Project="..\packages\sdl2.nuget.2.0.16\build\native\sdl2.nuget.targets" Condition="Exists('..\packages\sdl2.nuget.2.0.16\build\native\sdl2.nuget.targets')" />
     <Import Project="..\packages\sdl2_image.nuget.redist.2.0.5\build\native\sdl2_image.nuget.redist.targets" Condition="Exists('..\packages\sdl2_image.nuget.redist.2.0.5\build\native\sdl2_image.nuget.redist.targets')" />
     <Import Project="..\packages\sdl2_image.nuget.2.0.5\build\native\sdl2_image.nuget.targets" Condition="Exists('..\packages\sdl2_image.nuget.2.0.5\build\native\sdl2_image.nuget.targets')" />
+    <Import Project="..\packages\RtMidi.Core.1.0.51\build\RtMidi.Core.targets" Condition="Exists('..\packages\RtMidi.Core.1.0.51\build\RtMidi.Core.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -107,5 +111,6 @@
     <Error Condition="!Exists('..\packages\sdl2.nuget.2.0.16\build\native\sdl2.nuget.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\sdl2.nuget.2.0.16\build\native\sdl2.nuget.targets'))" />
     <Error Condition="!Exists('..\packages\sdl2_image.nuget.redist.2.0.5\build\native\sdl2_image.nuget.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\sdl2_image.nuget.redist.2.0.5\build\native\sdl2_image.nuget.redist.targets'))" />
     <Error Condition="!Exists('..\packages\sdl2_image.nuget.2.0.5\build\native\sdl2_image.nuget.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\sdl2_image.nuget.2.0.5\build\native\sdl2_image.nuget.targets'))" />
+    <Error Condition="!Exists('..\packages\RtMidi.Core.1.0.51\build\RtMidi.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RtMidi.Core.1.0.51\build\RtMidi.Core.targets'))" />
   </Target>
 </Project>

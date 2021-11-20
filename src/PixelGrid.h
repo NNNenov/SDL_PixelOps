@@ -11,14 +11,25 @@ public:
 	vec2i gSize;                 // grid resolution
 	vec2i pSize;                 // output resolution
 	
-	std::vector<Cell>  cells;    // grid cells
-	std::vector<vec3i> pixels;   // output pixels
-	
+	vec2i Lmid   ;
+	vec2i Rmid   ;
+	vec2i Bmid   ;
+	vec2i Tmid   ;
+	vec2i mid    ;
+	vec2i TLeft  ;
+	vec2i TRight ;
+	vec2i Rbot   ;
+	vec2i Lbot   ;
+
+	std::vector<Cell>  cells;          // grid cells
+	std::vector<Cell>  cellBuffer;
+	//std::vector<vec3i*> pixels;        // output pixels
+	Uint32* pixels; 
 	int scale = 1;
 	int ID = 0;
 	
 	CellGrid() {}
-	~CellGrid() {}
+	~CellGrid() { delete[] pixels;	}
 
 	CellGrid(vec2i pixelSpace, int scl)
 	{
@@ -26,7 +37,7 @@ public:
 		pSize = pixelSpace;
 		gSize = pSize / scale;
 		cells.resize(gSize.x() * gSize.y());
-		pixels.resize(gSize.x() * gSize.y());
+		//pixels.resize(gSize.x() * gSize.y());
 	}
 
 	void init(vec2i pixelSpace, int scl)
@@ -35,25 +46,39 @@ public:
 		pSize = pixelSpace;
 		gSize = pSize / scale;
 		cells.resize(gSize.x() * gSize.y());
-		pixels.resize(pSize.x() * pSize.y());
+		cellBuffer = cells;
+
+		pixels = new Uint32[pSize.x() * pSize.y()];
+		memset(pixels, 0, pSize.x() * pSize.y() * sizeof(Uint32));
+
 		std::cout << "\n   pixelGrid initialized " << std::endl;
 		std::cout << "         scale: " << scale << std::endl;
 		std::cout << "     Grid Size: " << gSize.toString() << std::endl;
 		std::cout << "    Pixel Size: " << pSize.toString() << std::endl;
 		//cells[gSize.x() * gSize.y() - 1].print();
+
+		TLeft  = 0;
+		TRight = { gSize.x()     , 0             };
+		Rbot   = { gSize.x()     , gSize.y()     };
+		Lbot   = { 0             , gSize.y()     };
+		Lmid   = { 0             , gSize.y() / 2 };
+		Rmid   = { gSize.x()     , gSize.y() / 2 };
+		Bmid   = { gSize.x() / 2 , gSize.y()     };
+		Tmid   = { gSize.x() / 2 , 0             };
+		mid    = { gSize.x() / 2 , gSize.y() / 2 };
 	}
 
 	vec2i gS() { return gSize;     };
 	int   xS() { return gSize.x(); };
 	int   yS() { return gSize.y(); };
 
-	std::vector<vec3i> & printPixels()
+	Uint32* printPixels()
 	{
 		resizeGrid(gSize, pSize);
 		return pixels;
 	}
 
-	Cell & scaleResCell(int x, int y) 
+	vec3i* scaleResCell(int x, int y) 
 	{
 
 		int x_ratio = (int)((gSize.x() << 16) / pSize.x()) + 1;
@@ -64,17 +89,17 @@ public:
 		y2 = (y * (y_ratio) >> 16);
 
 		int id = (y2 * gSize.x()) + x2;
-		return cells[id]; 
+		return &cells[id].rgb();
 	}
 
 	void resizeGrid(vec2i sourceRes, vec2i targetRes) 
 	{
 		//std::cout << "\n    resizing to: " << targetRes.toString() << std::endl; // << xSize << " , " << ySize << std::endl;
-		for (int y = 0; y < targetRes.y()-1; ++y) 
+		for (int y = 0; y < targetRes.y(); ++y) 
 		{
-			for (int x = 0; x < targetRes.x()-1; ++x) 
+			for (int x = 0; x < targetRes.x(); ++x) 
 			{
-				pixels[(y * targetRes.x()) + x] = scaleResCell(x, y).rgb();
+				pixels[(y * targetRes.x()) + x] = scaleResCell(x, y)->vtoUint32();
 			}
 		}
 	}
@@ -149,9 +174,9 @@ public:
 		}
 	}
 
-	void shiftCells(vec2i dir, bool cl = false)
+	void shiftCells_legacy(vec2i dir, vec2i TL, vec2i BR)
 	{
-		std::vector<Cell> cellBuffer = cells; // (xS() * yS());
+		std::vector<Cell> cellBuffer (xS() * yS());
 		//std::cout << "\n direction:	" << dir.toString() << std::endl;
 		
 		int cX;
@@ -159,27 +184,106 @@ public:
 		int shiftX;
 		int shiftY;
 
-		for (int x = xS(); x >0  ; --x)
+		for (int x = TL.x(); x < BR.x(); ++x)
 		{
-			for (int y = 0; y < yS() - 1; ++y)
+		for (int y = TL.y(); y < BR.y(); ++y)
+		{
+			cX = clamp(x, 1, xS() - 1);
+			cY = clamp(y, 1, yS() - 1);
+			shiftX = clamp(x + dir.x(), 1, xS() - 1);
+			shiftY = clamp(y + dir.y(), 1, yS() - 1);
+
+			cellBuffer[cY * xS() + cX].set( cells[shiftY * xS() + shiftX]);
+
+			//if (y == yS()/2) cellBuffer[cY * xS() + cX].print();
+		}
+		}
+
+		cells = cellBuffer;
+	}
+	std::vector<Cell>& shiftCells(std::vector<Cell>& cellBuffer, vec2i dir, vec2i TL, vec2i BR, bool additive = 0)
+	{
+		int cX;
+		int cY;
+		int shiftX;
+		int shiftY;
+
+		for (int x = TL.x(); x < BR.x(); ++x)
+		{
+			for (int y = TL.y(); y < BR.y(); ++y)
 			{
 				cX = clamp(x, 1, xS() - 1);
 				cY = clamp(y, 1, yS() - 1);
 				shiftX = clamp(x + dir.x(), 1, xS() - 1);
 				shiftY = clamp(y + dir.y(), 1, yS() - 1);
-
-				cellBuffer[cY * xS() + cX].set( cells[shiftY * xS() + shiftX]);
-
-				//if (y == yS()/2) cellBuffer[cY * xS() + cX].print();
+				if (additive)
+				{
+					if (cellBuffer[shiftY * xS() + shiftX].alive())
+					cellBuffer[cY * xS() + cX].set(cells[shiftY * xS() + shiftX]);
+				}
+				else
+				{
+				cellBuffer[cY * xS() + cX].set(cells[shiftY * xS() + shiftX]);
+				}
 			}
 		}
-
-		cells = cellBuffer;
+		return cellBuffer;
 	}
 
-	std::vector<Cell> get2Dhood(vec2i pos)
+	void symShift(vec2i dir, int R)
 	{
-		std::vector<Cell> result(8); // 8 neighbours
+		//std::vector<Cell> cellBuffer (xS() * yS());
+		//cellBuffer = cells;
+
+		switch (R%9) {
+		case 0:
+			      shiftCells(cellBuffer, { dir.x()     , dir.y() * -1 }, TLeft, Rmid);
+			      shiftCells(cellBuffer, { dir.x()     , dir.y()      }, Lmid,  Rbot);
+			break;
+		case 1:
+			      shiftCells(cellBuffer, { dir.x()     , dir.y() }, Tmid, Rbot);
+				  shiftCells(cellBuffer, { dir.x() * -1, dir.y()      }, TLeft, Bmid);
+			break;							        
+		case 2:								        
+			      shiftCells(cellBuffer, { dir.x()     , dir.y() }, Tmid, Rbot);
+				  shiftCells(cellBuffer, { dir.x() * -1, dir.y()      }, TLeft, Bmid);
+			break;							        
+		case 3:								        
+			      shiftCells(cellBuffer, { dir.x() * -1, dir.y() }, Tmid, Rbot);
+				  shiftCells(cellBuffer, { dir.x()     , dir.y()      }, TLeft, Bmid);
+			break;
+		case 4:
+			      shiftCells(cellBuffer, { dir.x()     , dir.y() * -1 }, TLeft, Rbot);
+				  shiftCells(cellBuffer, { dir.x()     , dir.y()      }, TLeft, Rbot, true);
+			break;
+		case 5:
+			      shiftCells(cellBuffer, dir, TLeft, Rbot);
+			break;
+		case 6:
+			      shiftCells(cellBuffer, dir*-1, TLeft, Rbot);
+			break;
+		case 7:
+			switch (R % 4) {
+			case 0:	shiftCells(cellBuffer, { dir.x() * -1, dir.y() }, TLeft, mid); break;
+			case 1:	shiftCells(cellBuffer, { dir.x()     , dir.y() }, Tmid, Rmid); break;
+			case 2:	shiftCells(cellBuffer, { dir.x() * -1, dir.y() * -1 }, Lmid, Bmid); break;
+			case 3:	shiftCells(cellBuffer, { dir.x()     , dir.y() * -1 }, mid, Rbot); break;
+			}
+		case 8:
+			        shiftCells(cellBuffer, { dir.x()     , dir.y()      }, TLeft, mid);
+			        shiftCells(cellBuffer, { dir.x() * -1, dir.y()      }, Tmid, Rmid);
+			        shiftCells(cellBuffer, { dir.x()     , dir.y() * -1 }, Lmid, Bmid);
+			        shiftCells(cellBuffer, { dir.x() * -1, dir.y() * -1 }, mid, Rbot);
+			break;
+		}
+
+		//cells = cellBuffer;
+	}
+
+
+	std::vector<Cell*>  get2Dhood(vec2i pos)
+	{
+		std::vector<Cell*> result(8); // 8 neighbours
 		int c = 0;
 		//std::cout << "init pos sample: " << pos.toString() << std::endl;
 		for (int i = 0; i < 9; ++i) // iterate 3x3 grid
@@ -195,7 +299,7 @@ public:
 			{
 				++c;
 				//std::cout << "pos sample (i): " << i << "__ (c): " << c << " ___ " << vec2i{ x, y }.toString() << " state: "<< cells[id].alive() << std::endl;
-				result[c-1].set(cells[id]);
+				result[c-1] = &(cells[id]);
 			}
 		}
 		//std::cout << "return result " << std::endl;
@@ -204,7 +308,7 @@ public:
 
 	void CA2D_Sim()
 	{
-		std::vector<Cell> cellBuffer = cells;//(xS() * yS());
+		cellBuffer = cells;//(xS() * yS());
 		//std::cout << "\n direction:	" << dir.toString() << std::endl;
 
 		for (int x = 1; x < xS()-1; ++x)
@@ -213,7 +317,7 @@ public:
 			{
 				//cX = clamp(x, 0, xS());
 				//cY = clamp(y, 0, yS());
-				std::vector<Cell> nei = get2Dhood({ x, y });
+				std::vector<Cell*> nei = get2Dhood({ x, y });
 
 				cellBuffer[y * xS() + x].CA2D( nei );
 
@@ -221,7 +325,7 @@ public:
 			}
 		}
 
-		cells = cellBuffer;
+		//cells = cellBuffer;
 	}
 	
 };
