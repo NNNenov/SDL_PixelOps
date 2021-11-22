@@ -88,6 +88,7 @@
     <ClInclude Include="..\..\src\Engine.h" />
     <ClInclude Include="..\..\src\genImage.h" />
     <ClInclude Include="..\..\src\nikMidi.h" />
+    <ClInclude Include="..\..\src\particle.h" />
     <ClInclude Include="..\..\src\PixelGrid.h" />
     <ClInclude Include="..\..\src\RtMidi.h" />
     <ClInclude Include="..\..\src\vecClass.h" />

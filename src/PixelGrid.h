@@ -92,6 +92,20 @@ public:
 		return &cells[id].rgb();
 	}
 
+	vec2i scaleResLocator(int x, int y, vec2i sourceDims)
+	{
+
+		int x_ratio = (int)((gSize.x() << 16) / sourceDims.x()) + 1;
+		int y_ratio = (int)((gSize.y() << 16) / sourceDims.y()) + 1;
+
+		float x2, y2;
+		x2 = (x * (x_ratio) >> 16);
+		y2 = (y * (y_ratio) >> 16);
+
+		int id = (y2 * gSize.x()) + x2;
+		return vec2i{ x2, y2 };
+	}
+
 	void resizeGrid(vec2i sourceRes, vec2i targetRes) 
 	{
 		//std::cout << "\n    resizing to: " << targetRes.toString() << std::endl; // << xSize << " , " << ySize << std::endl;
@@ -120,6 +134,33 @@ public:
 	{
 		cells[clamp(pos.y(), 0, yS() - 1) * xS() + clamp(pos.x(), 0, xS() - 1)].set(A);
 		//std::cout << "\n cell:	" << clamp(pos.y(), 0, ySize - 1) * xSize + clamp(pos.x(), 0, xSize - 1)<< "  set to: "<< A << std::endl;
+	}
+
+	void setCellMod(vec2i pos, bool A)
+	{
+		int wX = (pos.x() > 0) ? (pos.x() % xS()) : (xS() + pos.x()-1);
+		int wY = (pos.y() > 0) ? (pos.y() % yS()) : (yS() + pos.y()-1);
+		vec2i wrap = { wX,wY };
+		cells[wrap.y() * xS() + wrap.x()].set(A);
+		//std::cout << "\n cell:	" << clamp(pos.y(), 0, ySize - 1) * xSize + clamp(pos.x(), 0, xSize - 1)<< "  set to: "<< A << std::endl;
+	}
+	void setBufferCell(vec2i pos, bool A)
+	{
+		cellBuffer[clamp(pos.y(), 0, yS() - 1) * xS() + clamp(pos.x(), 0, xS() - 1)].set(A);
+		//std::cout << "\n cell:	" << clamp(pos.y(), 0, ySize - 1) * xSize + clamp(pos.x(), 0, xSize - 1)<< "  set to: "<< A << std::endl;
+	}
+
+	void setBufferCellMod(vec2i pos, bool A)
+	{
+		int wX = (pos.x() > 0) ? (pos.x() % xS()) : (xS() + pos.x() - 1);
+		int wY = (pos.y() > 0) ? (pos.y() % yS()) : (yS() + pos.y() - 1);
+		vec2i wrap = { wX,wY };
+		cellBuffer[wrap.y() * xS() + wrap.x()].set(A);
+		//std::cout << "\n cell:	" << clamp(pos.y(), 0, ySize - 1) * xSize + clamp(pos.x(), 0, xSize - 1)<< "  set to: "<< A << std::endl;
+	}
+	bool getCell(vec2i pos)
+	{
+		return cells[clamp(pos.y(), 0, yS() - 1) * xS() + clamp(pos.x(), 0, xS() - 1)].alive();
 	}
 
 	void box(const vec2i TL, const vec2i wh)
@@ -161,7 +202,7 @@ public:
 	{
 		for (int x = 1 + off.x(); x < xS() - 1 - off.x(); ++x)
 		{
-			if (x % gMod == 0)
+			if (x % (1+gMod) == 1)
 			{
 				for (int y = 1 + off.y(); y < yS() - 1 - off.y(); ++y)
 				{
@@ -171,6 +212,16 @@ public:
 					}
 				}
 			}
+		}
+	}
+
+	void line(vec2i A, vec2i B) // start vector A loop lerp to destination vector B
+	{
+		int range = A.distance(B);
+		for (int a = 1; a<range; ++a)
+		{
+			vec2i lerpPos = A.lerpTo(B, (float)a / range);
+			setCell(lerpPos, true);
 		}
 	}
 

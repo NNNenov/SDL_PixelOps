@@ -161,68 +161,70 @@ public:
 			if (i == 0)
 			{
 				int mDat = (int)message[0];
-				std::cout << "\nincoming message: " << mDat << std::endl;
-				int channel;
 
-				if (mDat >= 0x80 && mDat <= (0xE0 + 15))       //(0-15 channels) // check message is a voice message (has a channel) https://stackoverflow.com/questions/15993856/getting-midi-channel-from-midistatus
-				{
+					std::cout << "\nincoming message: " << mDat << std::endl;
+					int channel;
 
-					channel = (mDat & 0x0F);
-					status.channel = channel;
-					//std::cout << "channel: " << channel << std::endl;
-
-					if (mDat == 0x90 + channel) // note ON
+					if (mDat >= 0x80 && mDat <= (0xE0 + 15))       //(0-15 channels) // check message is a voice message (has a channel) https://stackoverflow.com/questions/15993856/getting-midi-channel-from-midistatus
 					{
-						status.note.gate = true;
-						status.note.latch = true;
-						status.note.pitch = (int)message[1];
-						status.note.vel = (int)message[2];
-						status.SetNote();
-						//    std::cout << "note ON, pitch: " << status.note.pitch << std::endl;
-					}
 
-					if (mDat == 0x80 + channel) // note OFF
-					{
-						status.note.gate = false;
-						status.note.gateLen = stamp;
-						status.note.latch = false;
-						//    std::cout << "note OFF, lasted: " << status.note.gateLen << std::endl;
-					}
+						channel = (mDat & 0x0F);
+						status.channel = channel;
+						//std::cout << "channel: " << channel << std::endl;
 
-					if (mDat == 0xA0 + channel)     //Aftertouch
-					{
-						status.note.pitch = (int)message[1];
-						status.note.aftertouch = (int)message[2];
-						//    std::cout << "Aftertouch: " << status.note.aftertouch << std::endl;
-						//    std::cout << "   on note: " << status.note.pitch      << std::endl;
-					}
+						if (mDat == 0x90 + channel) // note ON
+						{
+							status.note.gate = true;
+							status.note.latch = true;
+							status.note.pitch = (int)message[1];
+							status.note.vel = (int)message[2];
+							status.SetNote();
+							//    std::cout << "note ON, pitch: " << status.note.pitch << std::endl;
+						}
 
-					if (mDat == 0xB0 + channel)     //Continuous controller change
-					{
-						status.CCtype = true;
-						status.CCid = (int)message[1]; // byte 1 = cc id
-						status.CC = (int)message[2]; // byte 2 = cc value
-						//    std::cout << "   CC id: " << status.CCid << std::endl;
-						//    std::cout << "CC value: " << status.CC   << std::endl;
-					}
-					else { status.CCtype = false; }
+						if (mDat == 0x80 + channel) // note OFF
+						{
+							status.note.gate = false;
+							status.note.gateLen = stamp;
+							status.note.latch = false;
+							//    std::cout << "note OFF, lasted: " << status.note.gateLen << std::endl;
+						}
 
-					if (mDat == 0xC0 + channel)     //Patch change
-						status.patchID = (int)message[1];
-					//std::cout << "Patch ID: " << status.patchID << std::endl;
+						if (mDat == 0xA0 + channel)     //Aftertouch
+						{
+							status.note.pitch = (int)message[1];
+							status.note.aftertouch = (int)message[2];
+							//    std::cout << "Aftertouch: " << status.note.aftertouch << std::endl;
+							//    std::cout << "   on note: " << status.note.pitch      << std::endl;
+						}
 
-					if (mDat == 0xD0 + channel)     //Channel Pressure
-					{
-						status.channelPressure = (int)message[1];
-						//    std::cout << "Channel Pressure on CHANNEL: " << status.channelPressure << std::endl;
+						if (mDat == 0xB0 + channel)     //Continuous controller change
+						{
+							status.CCtype = true;
+							status.CCid = (int)message[1]; // byte 1 = cc id
+							status.CC = (int)message[2]; // byte 2 = cc value
+							//    std::cout << "   CC id: " << status.CCid << std::endl;
+							//    std::cout << "CC value: " << status.CC   << std::endl;
+						}
+						else { status.CCtype = false; }
+
+						if (mDat == 0xC0 + channel)     //Patch change
+							status.patchID = (int)message[1];
+						//std::cout << "Patch ID: " << status.patchID << std::endl;
+
+						if (mDat == 0xD0 + channel)     //Channel Pressure
+						{
+							status.channelPressure = (int)message[1];
+							//    std::cout << "Channel Pressure on CHANNEL: " << status.channelPressure << std::endl;
+						}
+						if (mDat == (0xE0 + channel))     //Pitch bend
+						{
+							status.pitchbend = ((int)message[2] * 128) + (int)message[1];
+							//    std::cout << "Pitch bend: " << status.pitchbend << std::endl;
+						}
 					}
-					if (mDat == (0xE0 + channel))     //Pitch bend
-					{
-						status.pitchbend = ((int)message[2] * 128) + (int)message[1];
-						//    std::cout << "Pitch bend: " << status.pitchbend << std::endl;
-					}
-				}
-				status.print();
+					status.print();
+				
 			}
 
 		}

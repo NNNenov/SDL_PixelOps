@@ -73,7 +73,7 @@ public:
 
 	void set(bool s)
 	{
-		age = maxAge*s;
+		age = s? maxAge : 0;
 		update();
 	}
 

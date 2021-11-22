@@ -40,6 +40,7 @@ template <typename T> T abs(T v) { return v * ((v > 0) - (v < 0)); }
 
 inline float ler(float a, float b, float f) { return ((float)a * (1.0 - f)) + ((float)b * f); }
 
+
 template<int n, typename real>
 class vec
 {
@@ -182,6 +183,16 @@ public:
         return result;
     }
 
+    vec operator%(const vec rhs) const
+    {
+        vec result;
+        for (int i = 0; i < n; ++i)
+        {
+            result.e[i] = (rhs.e[i]==0) ? 0 : (e[i] % rhs.e[i]);
+        }
+        return result;
+    }
+
     vec f() const
     {
         vec result;
@@ -212,6 +223,7 @@ public:
         }
         return result;
     }
+
     vec Floor() const
     {
         vec result;
@@ -222,12 +234,33 @@ public:
         return result;
     }
 
+    vec clampV(vec lo, vec hi) const
+    {
+        vec result;
+    
+        for (int i = 0; i < n; ++i)
+        {
+            result.e[i] = clamp(e[i], lo.e[i], hi.e[i]);
+        }
+        return result;
+    }
+
+    vec clampR(real lo, real hi) const
+    {
+        vec result;
+        for (int i = 0; i < n; ++i)
+        {
+            result.e[i] = clamp(e[i], lo, hi);
+        }
+        return result;
+    }
+
     vec lerpTo(vec b, float f)
     {
         vec result;
         for (int i = 0; i < n; ++i)
         {
-            result.e[i] = ((float)e[i] * (1.0 - f)) + ((float)b.e[i] * f);  //floor(e[i]);
+            result.e[i] = ler(e[i], b.e[i], f);//((float)e[i] * (1.0 - f)) + ((float)b.e[i] * f);  //floor(e[i]);
 
         }
 

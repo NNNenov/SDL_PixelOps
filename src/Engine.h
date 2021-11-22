@@ -5,6 +5,7 @@
 #include "genImage.h"
 #include "PixelGrid.h"
 #include "nikMidi.h"
+#include "particle.h"
 
 class Engine
 {
@@ -31,6 +32,14 @@ public:
 	channelData midiStatus;
 
 protected:
+
+	// presets
+	void CA_Fx();
+
+	//particle test
+	int partiID;
+	std::vector<nParticle> parti{ 50 };
+
 	// grid stuff
 	const int unitScale = 2;
 	CellGrid cGrid;
@@ -40,9 +49,14 @@ protected:
 	bool isRunning;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
-	int cnt =0;
-	int custom = 0;
+	int cnt = 1;
+	int custom = 1;
 	int winW, winH;
+	vec2i resizeWin;
+
+	vec2i mousePos = 0;
+	vec2i mousePPos= 10;
+
 
 };
 
