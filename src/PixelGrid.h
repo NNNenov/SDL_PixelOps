@@ -331,7 +331,6 @@ public:
 		//cells = cellBuffer;
 	}
 
-
 	std::vector<Cell*>  get2Dhood(vec2i pos)
 	{
 		std::vector<Cell*> result(8); // 8 neighbours
@@ -359,7 +358,7 @@ public:
 
 	void CA2D_Sim()
 	{
-		cellBuffer = cells;//(xS() * yS());
+		//cellBuffer = cells;//(xS() * yS());
 		//std::cout << "\n direction:	" << dir.toString() << std::endl;
 
 		for (int x = 1; x < xS()-1; ++x)

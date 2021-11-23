@@ -14,7 +14,7 @@ public:
 	// cellular automata parameters
 	std::vector<int> B = { 2 };     // living neighbours required to be born (if dead)
 	std::vector<int> S = { 3 , 4 , 5 }; // living neighbours required to survive (if alive)
-	int ref = 4;                    // refractory states // countdown after dying before exposing to calculation
+	int ref = 32;                    // refractory states // countdown after dying before exposing to calculation
 	int r = 0;                      // refractory state buffer
 
 	std::vector<vec3i> palette{

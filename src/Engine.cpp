@@ -41,6 +41,11 @@ void Engine::init(const char* title, int xpos, int ypos, int width, int height, 
 			 m_image.init(winW, winH, renderer);
 			 cGrid.init({ winW, winH }, unitScale);
 			 resizeWin = { winW, winH };
+			 for (int i = 0; i < parti.size(); ++i)
+			 {
+				 parti[i].pID = i;
+				 parti[i].bounds = cGrid.gS();
+			 }
 
 	} else { isRunning = false; }
 }
@@ -54,7 +59,7 @@ void Engine::handleEvents()
 		{
 			if (event.type == SDL_WINDOWEVENT)
 			{
-				SDL_Log("windowEVENT");
+				//SDL_Log("windowEVENT");
 				switch (event.window.event)
 				{
 				case SDL_WINDOWEVENT_RESIZED:
@@ -81,11 +86,14 @@ void Engine::handleEvents()
 				mousePPos = mousePos;
 				mousePos = cGrid.scaleResLocator(x, y, resizeWin);
 				SDL_Log("Mouse Button 1 (left) is pressed.");
-				++partiID;
-				partiID = (partiID ) % (parti.size());
-				parti[partiID].reset(mousePos);
-				SDL_Log("current mouse pos: %s" , mousePos.toString());
-				if (cnt >100)cGrid.line(mousePPos, mousePos);
+				++readPartiID;
+				readPartiID = (readPartiID ) % (parti.size());
+				parti[readPartiID].reset(mousePos);
+				parti[readPartiID].updateNearest(parti);
+				parti[readPartiID].latch = true;
+				printf("\nnew particle updated, nearest neighbour dist: [ %d ] , pos: [ %s ]", parti[readPartiID].distNearest, parti[readPartiID].posNearest.toString());
+				//SDL_Log("current mouse pos: %s" , mousePos.toString());
+				//if (cnt >100)cGrid.line(mousePPos, mousePos);
 			}
 
 
@@ -165,46 +173,58 @@ void Engine::CA_Fx()
 
 void Engine::update()
 {
-	int gMod = 50;
+	int gMod = 15;
 	
 	
 	//cGrid.cellBuffer = cGrid.cells;
 
 	if (cnt == 1)
 	{
-		
-		//for (int x = 0; x < cGrid.xS(); ++x)
-		//{
-		//	if (x % gMod == 0)
-		//	{
-		//		for (int y = 0; y < cGrid.yS(); ++y)
-		//		{
-		//			if (y % gMod == 0)
-		//			{
-		//				parti.push_back(nParticle({ x , y }, cGrid.gS()));
-		//				
-		//			}
-		//		}
-		//	}
-		//}
+
+		for (int x = 0; x < cGrid.xS(); ++x)
+		{
+			if (x % gMod == 0)
+			{
+				for (int y = 0; y < cGrid.yS(); ++y)
+				{
+					if (y % gMod == 0)
+					{
+						++readPartiID;
+						readPartiID = (readPartiID) % (parti.size());
+						parti[readPartiID].reset({ x + randomDouble() * gMod/2, y + randomDouble() * gMod/2 });
+						parti[readPartiID].updateNearest(parti);
+						
+					}
+				}
+			}
+		}
+		for (int i = 0; i < parti.size(); ++i)
+		{
+			parti[i].updateNearest(parti);
+		}
 		//parti.push_back(nParticle(cGrid.Lbot + vec2i{75, -100}, cGrid.gS()));
 		//parti.push_back(nParticle({ 44 , 96 }, cGrid.gS()));
 	}
 	++cnt;
 	//printf("\nparti size: %d", parti.size());
 	//SDL_Log("number of particles: %d", parti.size());
-	
+	//CA_Fx();
 	for (int i = 0; i < parti.size(); ++i)
 	{
 		
-
+		//parti[readPartiID].updateNearest(parti);
 		if (parti[i].alive())
 		{
+			if (!parti[i].latch) parti[i].randFlow();
 			//parti[i].randoff();
 			parti[i].simulate();
-			parti[i].display(cGrid);
+			
 
-			if (cnt % 5 == 0) parti[i].growCircle(cGrid);
+			if (cnt % 2 == 0 && parti[i].latch)
+			{
+				parti[i].updateNearest(parti);
+				parti[i].growCircle(cGrid);
+			}
 
 			//if (!parti[i].alive())
 			//{ 
@@ -212,8 +232,13 @@ void Engine::update()
 			//	parti.erase(parti.begin() + i); 
 			//}
 		}
+		parti[i].display(cGrid);
 	}
-	cGrid.simulate(cnt, 2);
+	//
+	cGrid.simulate(cnt, 1);
+
+	//cGrid.cellBuffer = cGrid.cells;
+	//cGrid.CA2D_Sim();
 	//cGrid.cells = cGrid.cellBuffer;
 	
 }

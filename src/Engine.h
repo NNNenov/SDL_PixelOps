@@ -37,11 +37,11 @@ protected:
 	void CA_Fx();
 
 	//particle test
-	int partiID;
-	std::vector<nParticle> parti{ 50 };
+	int readPartiID;
+	std::vector<nParticle> parti{ 750 };
 
 	// grid stuff
-	const int unitScale = 2;
+	const int unitScale = 1;
 	CellGrid cGrid;
 	genImage m_image;
 
